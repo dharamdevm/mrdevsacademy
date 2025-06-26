@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Question Paper Generator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Mr. Dev's International Academy</h1>
+  </header>
+
+  <main>
+    <form id="questionForm">
+      <label>Subject:
+        <input type="text" name="subject" required />
+      </label>
+
+      <label>Country:
+        <input type="text" name="country" required />
+      </label>
+
+      <label>Grade / University / Exam:
+        <input type="text" name="grade" required />
+      </label>
+
+      <label>Topic:
+        <input type="text" name="topic" required />
+      </label>
+
+      <label>Number of Questions:
+        <input type="number" name="number" required min="1" />
+      </label>
+
+      <label>Question Type:
+        <select name="type" required>
+          <option value="mcq">MCQ</option>
+          <option value="descriptive">Descriptive</option>
+          <option value="both">Both</option>
+        </select>
+      </label>
+
+      <label>Optional Prompt (Multilingual, pattern, marks, etc.):
+        <textarea name="prompt" placeholder="Optional prompt for custom formats, language, or question styles"></textarea>
+      </label>
+
+      <button type="submit">Generate Question Paper</button>
+    </form>
+
+    <section id="output"></section>
+  </main>
+
+  <footer>
+    <p><a href="https://mrdevsacademy.org" target="_blank">mrdevsacademy.org</a> | <a href="https://wa.me/917550001202" target="_blank">Call on WhatsApp</a></p>
+  </footer>
+
+  <script>
+    document.getElementById("questionForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        subject: form.subject.value,
+        country: form.country.value,
+        grade: form.grade.value,
+        topic: form.topic.value,
+        number: form.number.value,
+        type: form.type.value,
+        prompt: form.prompt.value.trim(),
+      };
+
+      const userPrompt = `Generate a question paper for:\nSubject: ${data.subject}\nCountry: ${data.country}\nLevel: ${data.grade}\nTopic: ${data.topic}\nQuestion Type: ${data.type}\nNumber of Questions: ${data.number}` + (data.prompt ? `\nAdditional Instructions: ${data.prompt}` : "");
+
+      const response = await fetch("/.netlify/functions/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": 'Bearer OPENAI_API_KEY'
+        },
+        body: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: "You are an expert in creating academic question papers." },
+            { role: "user", content: userPrompt }
+          ]
+        })
+      });
+
+      const result = await response.json();
+      document.getElementById("output").innerText = result.choices?.[0]?.message?.content || "Error generating paper.";
+    });
+  </script>
+</body>
+</html>
